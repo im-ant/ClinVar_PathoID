@@ -60,14 +60,23 @@ def ClinVar_Search_Loop(v_list, search_type):
 
         #Perform the appropriate search and process results
         if search_type==0: #Access eSearch
+            #Search and retrieve the results in a List
             result = eSearch_getIDs(url_query)
+            #Call function to initiate the list into the variant
             eSearch_processResults(v_list[i], result)
         elif search_type==1: #Access eSummary
+            #Search and retrieve results in a dictionary
             result_dict = eSummary_getResult(url_query)
-            eSummary_processResults(v_list[i], result_dict)
+            #Check for exception and potential program termination
+            if result_dict == 1:
+                return 1
+            #Input nested dictionary into the Var object instance
+            v_list[i].recordLib = result_dict
 
         #Increase the request counter by 1
         request_counter += 1
+    #After loop, return success
+    return 0
 
 """ #### Helper Functions to find presence of and retrieve IDs ####"""
 #Function to generate the eSearch-appropriate url query from a Var object
@@ -145,20 +154,27 @@ def eSummary_getResult(url_query):
             print "AttributeError ({0}): {1}. Initiated as 'None'".format(e.errno, e.strerror)
             #Initiate NoneType as attribute
             doc_sum['clin_sig'] = None
+        #For all other exceptions, return message (to terminate program)
+        except Exception as e:
+            print e
+            return 1
+
         #Store the condition(s) as an array
         try:
             doc_sum['cond']= [t.find('trait_name').text for t in doc.find('trait_set').iter('trait')]
         except AttributeError as e: #If condition(s) not found...
             #Print error message
-            print "AttributeError ({0}): {1}. Initiated as 'None'".format(e.errno, e.strerror)
+            #print "AttributeError ({0}): {1}. Initiated as 'None'".format(e.errno, e.strerror)
+                #Decided against returning error message since sometimes there
+                #   can be empty conditions
             #Initiate NoneType as attribute
             doc_sum['cond'] = None
+        #For all other exceptions, return message (to terminate program)
+        except Exception as e:
+            print e
+            return 1
+
         #Input the clinical significance and conditions into document set
         doc_set[doc.get('uid')] = doc_sum
     #Return the nested dictionary
     return doc_set
-
-#Function to interpret and initiate the pathogenicity status from eSummary
-def eSummary_processResults(var, result_dict):
-    #Input nested dictionary into the Var object instance
-    var.recordLib = result_dict
