@@ -37,7 +37,10 @@ class Var:
     def output_clin_sig(self):
         #If there are no clinical significance, output No items found
         if self.recordLib == None:
-            return ""
+            return "No items found"
+        #Check to see if any ClinVar IDs returned an invalid variable type
+        if None in [info['clin_sig'] for key,info in self.recordLib.iteritems()]:
+            return "<ERROR> Unexpected events. Manual search recommended."
         #Join all clinical significance, separated by square brackets
         #   Also replace using colons to prevent comma-separation
         clinSig = ']['.join([info['clin_sig'] for key,info in self.recordLib.iteritems()])
@@ -48,12 +51,17 @@ class Var:
         #If there are no conditions found, output an empty string
         if self.recordLib == None:
             return ""
-        #Join all conditions together, separated by square brackets
-        output_cond = ""
-        for key, info in self.recordLib.iteritems():
-            output_cond += "[%s]"%(']['.join(c for c in info['cond']))
-        #Return the conditions, with additional pipe ('|') delimeter
-        #   Also replace using colons to prevent comma-separation
+        #Try to join all conditions together, separated by square brackets
+        try:
+            output_cond = ""
+            for key, info in self.recordLib.iteritems():
+                output_cond += "[%s]"%(']['.join(c for c in info['cond']))
+        #If a Nonetype is initiated for any of the conditions
+        except TypeError:
+            #Return an empty string
+            return ""
+        #If no exception, return the conditions, with additional pipe ('|')
+        #   delimeter; also replace commas using colons to prevent comma-separation
         return output_cond.replace('][',']|[').replace(',',';')
 
 
