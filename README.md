@@ -6,8 +6,10 @@ Instructions for use:
   - CV_PathoID.py
   - variant.py
   - connect.py
-- Use the command line to access the directory the .py files are located in. Once you are there, run the program from command line as so:
-  `python CV_PathoID.py path_to_your_input_variant_file`
+- Use the command line to access the directory the .py files are located in. Once you are there, run the program from command line by typing the following followed by the "enter" key:
+```
+python CV_PathoID.py path_to_your_input_variant_file
+```
 - Follow the prompts from the program. The output file(s) will be found in the same directory as the input files.
 * Note: filtering functionality has not been implemented yet.
 
