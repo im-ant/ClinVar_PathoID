@@ -39,6 +39,9 @@ def ClinVar_Search_Loop(v_list, search_type):
 
     #Iterate through each variant to initiate search terms
     for i in range(0, len(v_list)):
+        #User prompt for search progress
+        if i % 10 == 0:
+            print "\t%d of %d variants"%(i+1,len(v_list))
         #Generate the query term for the appropriate search
         if search_type == 0: #eSearch query term
             url_query = eSearch_generate_query(v_list[i])
