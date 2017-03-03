@@ -1,6 +1,18 @@
 # ClinVar_PathoID
 Searches up a list of variants to identify clinical significance and (if present) condition(s).
 
+Instructions for use:
+- Download the three .py files below into a directory of your choice
+  - CV_PathoID.py
+  - variant.py
+  - connect.py
+- Use the command line to access the directory the .py files are located in. Once you are there, run the program from command line as so:
+  `python CV_PathoID.py path_to_your_input_variant_file`
+- Follow the prompts from the program. The output file(s) will be found in the same directory as the input files.
+* Note: filtering functionality has not been implemented yet.
+
+
+
 File functionality descriptions:
  - CV_PathoID.py: carries out the main input/output and function calls
  - variant.py: contain the object classes and related helper functions
@@ -29,3 +41,6 @@ Other notes:
   - Note that there will be no way of knowing exactly how to distinguish between these individual records other than manually searching them
 - The input filename cannot have any periods (".") other than right in front of the file extension (e.g. file.output and file.csv)
   - The file has to also be in your current directory
+- No exception handling against networking / socket errors. Unsure how necessary this functionality is at this point.
+- Likely error: in the URL functions: eSearch_getIDs and eSummary_getResult of connect.py
+  - For now, any exceptions that arises other than AttributeError will cause the entire program to terminate immediately. May wish to fix this in the future to catch more exceptions.
