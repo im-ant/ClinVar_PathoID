@@ -1,7 +1,7 @@
 # ClinVar_PathoID
 Searches up a list of variants to identify clinical significance and (if present) condition(s).
 
-Instructions for use:
+# Instruction for use:
 - Download the three .py files below into a directory of your choice
   - CV_PathoID.py
   - variant.py
@@ -14,7 +14,7 @@ python CV_PathoID.py path_to_your_input_variant_file
 * Note: filtering functionality has not been implemented yet.
 
 
-
+# Other notes
 File functionality descriptions:
  - CV_PathoID.py: carries out the main input/output and function calls
  - variant.py: contain the object classes and related helper functions
