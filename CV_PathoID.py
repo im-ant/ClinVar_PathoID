@@ -56,16 +56,16 @@ def read_file(variant_list, filename, interest_cols):
     #Identify the type of spreadsheet file via regex
     if re.search(r'\.output$', filename):
         #Initialize tab-delimited file format
-        print "Initializing tab-delimited .output file..."
+        print "[Program] Initializing tab-delimited .output file..."
         if (read_and_initialize(filename, '\t', interest_cols, file_content) != 0):
             return 1
     elif re.search(r'\.csv$', filename):
         #Initialize comma-separated file format
-        print "Initializing comma-separated .csv file..."
+        print "[Program] Initializing comma-separated .csv file..."
         if (read_and_initialize(filename, ',', interest_cols, file_content) != 0):
             return 1
     else:
-        print "File extension not recognized, make sure it is 'output' or 'csv'"
+        print "[ERROR] File extension not recognized, make sure it is 'output' or 'csv'"
     #Initialize the content of the file:
     for r in file_content:
         variant_list.append(Var(r[0],r[1],r[2],r[3]))
@@ -80,7 +80,7 @@ def read_and_initialize (filename, delim, interest_cols, file_content):
         f = open(filename, 'r')
     #Except for I/O error in case file is not present
     except IOError as e:
-        print "I/O error({0}): {1}".format(e.errno, e.strerror)
+        print "[ERROR] I/O error({0}): {1}".format(e.errno, e.strerror)
         return 1
     #Read the entire file and separate by newline delimiters
     rows = f.read().split('\r')
@@ -104,27 +104,60 @@ def read_and_initialize (filename, delim, interest_cols, file_content):
 """################## Function to search ##################"""
 def search_ClinVar(variant_list):
     #Edit the annotations to become searchable
+    print "[Program] Formatting variant annotations..."
     variant.format_variantList(variant_list)
     #Loop through the variant list to find record IDs via eSearch
+    print "[Program] Beginning ClinVar eSearch for record IDs..."
     connect.ClinVar_Search_Loop(variant_list, 0)
     #Loop through the variant list to find record information
-    connect.ClinVar_Search_Loop(variant_list, 1)
+    print "[Program] Beginning ClinVar eSummary for record information..."
+    if ( connect.ClinVar_Search_Loop(variant_list, 1) != 0):
+        return 1
+    #If done, return success
+    return 0
 
 """################## Output Functions ##################"""
 #Master file to write output
-def write_output_file(filename, v_list):
-    #testlines
-    print
-    for v in v_list:
-        print v.output_clin_sig()
-        print v.output_conditions()
-    #Write append column
-    #append_end_column(filename, v_list)
-    write_new_csvFile(filename, v_list)
+def write_output_file(filename, v_list, output_type):
+    #If the user only wants the short .csv summary file
+    if output_type == 0:
+        print "[Program] Writing .csv ClinVar result summary file..."
+        write_new_csvFile(filename, v_list)
+    #If the user wants to output a file with the ClinVar info appended
+    elif output_type == 1:
+        print "[Program] Appending ClinVar result to new copy of original file..."
+        append_end_column(filename, v_list)
+    #If the user wants both of the above files
+    else:
+        print "[Program] Writing .csv ClinVar result summary file..."
+        write_new_csvFile(filename, v_list)
+        print "[Program] Appending ClinVar result to new copy of original file..."
+        append_end_column(filename, v_list)
+    #Prompt user after finishing file writing and return success
+    print "[Program] Done writing output files."
+    return 0
 
 #Ask the user for what type of output they want
-def get_output_type(filename):
-    print "what type of output?"
+def get_output_type():
+    #Indicate to user file types
+    out_types = ["0 - Short .csv file summarizing ClinVar results"]
+    out_types.append("1 - Same file as inputted, with appended ClinVar results")
+    out_types.append("2 - Both of the above outputs")
+    print "[Program] Please indicate the type of output file(s) you wish to create:"
+    print "\t%s\n\t%s\n\t%s"%(out_types[0],out_types[1],out_types[2])
+    #Prompt the user until a valid user input is received
+    while (True):
+        usr_in = raw_input('Type [0/1/2] followed by "enter": ')
+        #Check if user input is a single digit between 0-2
+        if len(usr_in)==1 and usr_in.isdigit() and int(usr_in) < 3:
+            #Let the user know the file type they have selected
+            print "[Program] You selected: %s" % (out_types[int(usr_in)])
+            #Break infinite loop
+            break
+        #If not valid, prompt user to enter again
+        print "[ERROR] Invalid input, try again."
+    #Return the integer representation of the user's input
+    return int(usr_in)
 
 #Function to generate a new .csv file containing the essential information
 def write_new_csvFile(filename, v_list):
@@ -134,12 +167,12 @@ def write_new_csvFile(filename, v_list):
     #Open the output file
     f_out = open(output_name, 'w')
     #Write header
-    header = ['Gene Name','Clinical Significance','Detailed Variant Annotation','SNP (rs number)','Disease Conditions']
+    header = ['Gene Name','Detailed Variant Annotation','SNP (rs number)','Clinical Significance','Disease Conditions']
     f_out.write(','.join(header)+'\r')
     #Iterate through all variants to write content
     for v in v_list:
         #Get all related information
-        infoList=[v.gene,v.output_clin_sig(),v.annotation,v.snp,v.output_conditions()]
+        infoList=[v.gene,v.annotation,v.snp,v.output_clin_sig(),v.output_conditions()]
         #Write information
         f_out.write(','.join(infoList)+'\r')
     #Close the file output stream
@@ -186,8 +219,6 @@ def append_end_column(filename,v_list):
 
 
 
-
-
 # Main Workflow Function
 def main():
     #Harcoded columns of interest to initiate from the file
@@ -197,7 +228,7 @@ def main():
         print "[ERROR] Incorrect number of arguments."
         return 0
     #Ask the user about output options
-
+    output_type = get_output_type()
     #Initiate a list that will contain variant objects
     variant_list = []
     #Open the file and initiate content
@@ -205,9 +236,10 @@ def main():
         print "[ERROR] Something went wrong while reading the file"
         return 0
     #Search step
-    search_ClinVar(variant_list)
+    if ( search_ClinVar(variant_list) != 0 ):
+        return 0
     #Output step
-    write_output_file(sys.argv[1], variant_list) #add more error checks?
+    write_output_file(sys.argv[1], variant_list, output_type) #add more error checks?
 
 
 main()
