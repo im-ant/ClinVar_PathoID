@@ -17,14 +17,15 @@
 #
 #
 # Note to self:
-#   - Number of command line arguments are subjected to change
-#       - For now: sys.argv[1] is the input file path
+#   - sys.argv[1] is the input file path
 #   - Only identifies and reads .csv and .output files for now
 #   - The interestd column numbers are hard-coded in read_file
 #   - Problem with newline - not marked by '\n', will need to
 #       manually separate lines via delimiters "\r"
 #       - This is assumed to be the same for both .output and .csv
 #           files, which may or may not cause problems down the road
+#       - However, for now, this seems to be the case and there has not
+#           been any problems running either .csv or .output files yet
 #   - Outputting an appended file:
 #       - Re-read and split the file, then re-write with the pathogenic
 #           and disease condition status appended to end of each line
@@ -161,7 +162,7 @@ def get_output_type():
 
 #Function to generate a new .csv file containing the essential information
 def write_new_csvFile(filename, v_list):
-    #Generate output file name
+    #Generate output file name using the input file name and today's date
     date = str(datetime.date.today()).replace('-','')
     output_name = filename.split('.')[0]+'_ClinVarResultSummary_%s.csv'%(date)
     #Open the output file
@@ -192,7 +193,7 @@ def append_end_column(filename,v_list):
     f_in = open(filename, 'r')
     #Read the input file and split via newline delimiter
     input_rows = f_in.read().split('\r')
-    #Generate output file name
+    #Generate output file name using the input file name and today's date
     date = str(datetime.date.today()).replace('-','')
     output_name = filename.replace('.','_ClinVarAppended_%s.'%(date))
     #Open output file
