@@ -10,17 +10,17 @@ Searches up a list of variants to identify clinical significance and (if present
 2. **(Optional, if gene-specific filtering is desired)** Create a plaintext file named *Wanted_Genes.txt* in the directory that the python (.py) files are in
   - In each new line of the file, enter a new gene that you wish to filter for (I.e. keep variants with this gene)
   - Example format below:
-```
-GENE1
-GENE2
-GENE3
-```
+    ```text
+    GENE1
+    GENE2
+    GENE3
+    ```
   - *Note that* you can create this file even if you do not wish to filter for genes. There are additional user-prompts as the program is running which will confirm whether you want to filter for genes or not.
 
 3. Use the command line to access the directory the .py files are located in. Once you are there, run the program from command line by typing the following followed by the "enter" key:
-```
-python CV_PathoID.py path_to_your_input_variant_file
-```
+  ```
+  python CV_PathoID.py path_to_your_input_variant_file
+  ```
 
 4. Follow the prompts from the program. The output file(s) will be found in the same directory as the input files.
 
