@@ -13,6 +13,23 @@ python CV_PathoID.py path_to_your_input_variant_file
 - Follow the prompts from the program. The output file(s) will be found in the same directory as the input files.
 * Note: filtering functionality has not been implemented yet.
 
+# Note on variant annotation formatting
+Below are the steps taken (in the order they appear in) to format each detailed variant annotation into what is inputted into ClinVar to search.
+- Replace ":exon" with ".", if present
+- If there are brackets present in the annotation, simply return what is contained in the brackets (without the next steps)
+- Remove everything before "NM" and after (inclusive) ":p"
+- Change the nucleotide variation formatting:
+  - I.e. ":c.G123C" is changed into ":c.123G>C"
+- Example:
+  - Raw annotation: *exonic:nonsynonymous_SNV:SRY:NM_003140:exon1:c.A593C:p.Y198S*
+  - Formatted annotation: *NM_003140.1:c.593A>C*
+
+In accordance with the above formatting steps, the following assumption about each of the raw variant annotation is made:
+- All variants are of the "NM_" type (no "NR_", or others)
+- All variants have single nucleotide variations
+- Bracketed variants provide the correct format for ClinVar search
+
+Note that the above formatting does not provide a comprehensive translation into a ClinVar-appropriate variant annotation format, and is therefore subjected to change. Feel free to to change the formatting steps in the file **variant.py** within the function **format_annotation()**.
 
 # Other notes
 File functionality descriptions:
