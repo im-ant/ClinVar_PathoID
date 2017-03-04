@@ -16,7 +16,7 @@
 #
 # Author: Anthony Chen
 ##################################################################"""
-import re
+import sys
 
 class Var:
     #Class constructor and attributes
@@ -36,6 +36,9 @@ class Var:
     ########## Object methods ##########
     #Method to output the clinical significance
     def output_clin_sig(self):
+        #If the variant was not searched, indicate to user
+        if self.searchable == False:
+            return "Variant not searched"
         #If there are no clinical significance, output No items found
         if self.recordLib == None:
             return "No items found"
@@ -49,6 +52,9 @@ class Var:
 
     #Method to output the condition
     def output_conditions(self):
+        #If the variant was not searched, return empty string
+        if self.searchable == False:
+            return ""
         #If there are no conditions found, output an empty string
         if self.recordLib == None:
             return ""
@@ -67,13 +73,70 @@ class Var:
 
 
 #Goes through the entire variant list for pre-search formatting
-def format_variantList(variant_list):
-    for v in variant_list:
+def format_variantList(v_list):
+    #Initiate a list of genes
+    wanted_genes = []
+    #Check for the presence of filter genes in local directory
+    #   If such file is found, ask user if they wish to filter by genes
+    #   If filter is not wanted, just split annotations and format
+    if ( initiate_filter_genes(wanted_genes) != 0 ):
+        print "[Program] Formatting and searching all variant annotations."
+        #Iterate through list to format variants
+        for i in range(0,len(v_list)):
+            #Split (potential) multiple genes by the "|" delimiter
+            v_list[i].anno_list = v_list[i].annotation.split("|")
+            #Iterate through each annotation to format them properly for search
+            for j in range(0, len(v_list[i].anno_list)):
+                v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
+        #Return success
+        return 0
+
+    #Else, if the filter is wanted:
+    print "[Program] Filtering only for annotations containing genes of interest."
+    #Iterate through the list to filter and format each variant
+    for i in range(0,len(v_list)):
         #Split (potential) multiple genes by the "|" delimiter
-        v.anno_list = v.annotation.split("|")
-        #Iterate through each annotation to format them properly for search
-        for i in range(0, len(v.anno_list)):
-            v.anno_list[i] = format_annotation(v.anno_list[i])
+        v_list[i].anno_list = v_list[i].annotation.split("|")
+        #Iterate through each annotation to filter and/or format
+        for j in range(0, len(v_list[i].anno_list)):
+            #Check for the presence of gene in the annotation. If present, then format
+            if any(s in v_list[i].anno_list[j] for s in wanted_genes):
+                v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
+            #If the annotation does not contain any of the interested genes...
+            else:
+                #Remove the annotation from the list
+                v_list[i].anno_list.pop(j)
+    #Iterate through the list again to check for searchability
+    for i in range(0,len(v_list)):
+        #If a variant has no annotations left to be searched, it is not searchable
+        if len(v_list[i].anno_list) == 0:
+            v_list[i].searchable = False
+
+    #Return success
+    return 0
+
+#Looks for a reads a list of wanted genes from the local directory
+def initiate_filter_genes(gene_list):
+    #Attempt to open the input stream
+    try:
+        f = open("Wanted_Genes.txt", 'r')
+    #Except for I/O error in case file is not present
+    except IOError: return 1
+    #If the file is found, read it
+    gene_list += f.readlines()
+    #Strip off the nextline characters
+    for i in range(0, len(gene_list)):
+        gene_list[i] = gene_list[i].strip()
+    #Prompt the user to see if they want to use the gene filter
+    print "[Program] Detected file 'Wanted_Genes.txt' in local directory, with %d genes inside." % (len(gene_list))
+    while (True):
+        usr_in = raw_input('Would you like to initiate gene filtering? [y/n]: ')
+        if usr_in == 'y': return 0
+        if usr_in == 'n': return 1
+        #If input not valid, try again
+        print "[ERROR] Invalid input. Try again."
+
+
 
 #Function that formats an individual annotations
 """ FEEL FREE TO CHANGE BELOW """
