@@ -25,6 +25,8 @@ Searches up a list of variants to identify clinical significance and (if present
 
 4. Follow the prompts from the program. The output file(s) will be found in the same directory as the input files.
 
+5. Make sure you have a good stable internet connection while the program runs!
+
 
 # Note on variant annotation formatting
 Below are the steps taken (in the order they appear in) to format each detailed variant annotation into what is inputted into ClinVar to search.
