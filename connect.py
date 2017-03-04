@@ -21,7 +21,7 @@
 #           is a rather common occurance
 #       - Likely should do more error handling in the eSummary getReuslt
 #
-#
+# Author: Anthony Chen
 ##################################################################"""
 import urllib
 import time
