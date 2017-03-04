@@ -14,8 +14,9 @@
 #   - Not sure how to handle non-existing information workflow. Keep it as
 #       a NoneType, or make user manually check?
 #
-#
+# Author: Anthony Chen
 ##################################################################"""
+import re
 
 class Var:
     #Class constructor and attributes
@@ -75,8 +76,28 @@ def format_variantList(variant_list):
             v.anno_list[i] = format_annotation(v.anno_list[i])
 
 #Function that formats an individual annotations
+""" FEEL FREE TO CHANGE BELOW """
 def format_annotation(raw_anno):
-    #Temp formatting:
-    #formatted_anno = raw_anno
-    formatted_anno = raw_anno[raw_anno.index("NM"):]
-    return formatted_anno #testline
+    #Shorten the exon formatting, if present
+    good_anno = raw_anno.replace(":exon",".")
+    #If it contains brackets, just return what is now in the bracket
+    try:
+        good_anno = good_anno[good_anno.index('(')+1:good_anno.index(')')]
+        return good_anno
+    except ValueError: pass
+    #Else, remove everything before the "NM"
+    good_anno = good_anno[good_anno.find("NM"):]
+    #Remove the protein mutations, if present
+    try:
+        good_anno = good_anno[:good_anno.index(":p")]
+    except ValueError: pass
+    #Change the point mutation format, if present
+    #   In essense, change something such as C123A to 123C>A
+    try:
+        mutList = list(good_anno[good_anno.index(":c.")+3:]) #Get a char array of point mutation
+        mut = ''.join(mutList[1:len(mutList)-1]) #Get the numbers
+        mut += "%s>%s" % (mutList[0], mutList[len(mutList)-1]) #Get the changes to the nucleotide
+        good_anno = good_anno[:good_anno.index(':c.')+3] + mut #Append all together
+    except ValueError: pass
+    #Return the formatted annotation
+    return good_anno
