@@ -9,7 +9,8 @@ Searches up a list of variants to identify clinical significance and (if present
 
 2. **(Optional, if gene-specific filtering is desired)** Create a plaintext file named *Wanted_Genes.txt* in the directory that the python (.py) files are in
   - In each new line of the file, enter a new gene that you wish to filter for (I.e. keep variants with this gene)
-  - Example format below:
+  - Example format of content of the *Wanted_Genes.txt* file:
+
     ```
     GENE1
     GENE2
