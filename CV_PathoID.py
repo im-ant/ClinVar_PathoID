@@ -236,6 +236,11 @@ def main():
     if ( read_file(variant_list, sys.argv[1], cols_of_interest) != 0):
         print "[ERROR] Something went wrong while reading the file"
         return 0
+    #Step to make sure that the variant list isn't empty
+    print "[Program] %d variants initiated" % (len(variant_list))
+    if ( len(variant_list) == 0):
+        print "[ERROR] No variants initiated from file"
+        return 0
     #Search step
     if ( search_ClinVar(variant_list) != 0 ):
         return 0
