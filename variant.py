@@ -88,13 +88,32 @@ def format_variantList(v_list):
     for i in range(0,len(v_list)):
         #Split (potential) multiple genes by the "|" delimiter
         v_list[i].anno_list = v_list[i].annotation.split("|")
+
+        #Iterate through each annotation to delete the ones not containing a wanted gene
+        if apply_gene_filter:
+            #Initiate a list of annotations to delete from this variant
+            toDelete_list = []
+
+            #Iterate through each (currently un-processed) individual annotation
+            #TODO; make below cleaner via list comprehension???
+            for raw_anno in v_list[i].anno_list:
+                if not any(s in raw_anno for s in wanted_genes):
+                    toDelete_list.append(raw_anno)
+
+            #Delete the annotations that do not have the genes we want
+            for del_anno in toDelete_list:
+                if del_anno in v_list[i].anno_list:
+                    v_list[i].anno_list.remove(del_anno)
+
+            #Delete the temp list for memory
+            del toDelete_list
+
         #Iterate through each annotation to format them properly for search
         for j in range(0, len(v_list[i].anno_list)):
+            print i,j #TODO; delete line
+            #BUG: also something wrong with below when filtering genes, due to pop function
+            #BUG: need to do gene filtering in a different way
             v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
-
-            #If apply_gene_filter, pop annotation if it does not contain the gene
-            if apply_gene_filter and (not any(s in v_list[i].anno_list[j] for s in wanted_genes)):
-                v_list[i].anno_list.pop(j)
 
     #Iterate through the list again to check for searchability (i.e. if anything is filtered out)
     for i in range(0,len(v_list)):
@@ -111,7 +130,7 @@ def initiate_filter_genes(gene_list):
     try:
         f = open("Wanted_Genes.txt", 'r')
     #Except for I/O error in case file is not present
-    except IOError: return 1
+    except IOError: return False
     #If the file is found, read it
     gene_list += f.readlines()
     #Strip off the nextline characters
