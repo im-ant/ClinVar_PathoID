@@ -76,37 +76,27 @@ class Var:
 def format_variantList(v_list):
     #Initiate a list of genes
     wanted_genes = []
+
     #Check for the presence of filter genes in local directory
     #   If such file is found, ask user if they wish to filter by genes
-    #   If filter is not wanted, just split annotations and format
-    if ( initiate_filter_genes(wanted_genes) != 0 ):
-        print "[Program] Formatting and searching all variant annotations."
-        #Iterate through list to format variants
-        for i in range(0,len(v_list)):
-            #Split (potential) multiple genes by the "|" delimiter
-            v_list[i].anno_list = v_list[i].annotation.split("|")
-            #Iterate through each annotation to format them properly for search
-            for j in range(0, len(v_list[i].anno_list)):
-                v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
-        #Return success
-        return 0
+    apply_gene_filter = initiate_filter_genes(wanted_genes)
 
-    #Else, if the filter is wanted:
-    print "[Program] Filtering only for annotations containing genes of interest."
-    #Iterate through the list to filter and format each variant
+    #User indication
+    print "[Program] Apply gene filter: %s." % str(apply_gene_filter)
+
+    #Iterate through list of variants to format variants
     for i in range(0,len(v_list)):
         #Split (potential) multiple genes by the "|" delimiter
         v_list[i].anno_list = v_list[i].annotation.split("|")
-        #Iterate through each annotation to filter and/or format
+        #Iterate through each annotation to format them properly for search
         for j in range(0, len(v_list[i].anno_list)):
-            #Check for the presence of gene in the annotation. If present, then format
-            if any(s in v_list[i].anno_list[j] for s in wanted_genes):
-                v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
-            #If the annotation does not contain any of the interested genes...
-            else:
-                #Remove the annotation from the list
+            v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
+
+            #If apply_gene_filter, pop annotation if it does not contain the gene
+            if apply_gene_filter and (not any(s in v_list[i].anno_list[j] for s in wanted_genes)):
                 v_list[i].anno_list.pop(j)
-    #Iterate through the list again to check for searchability
+
+    #Iterate through the list again to check for searchability (i.e. if anything is filtered out)
     for i in range(0,len(v_list)):
         #If a variant has no annotations left to be searched, it is not searchable
         if len(v_list[i].anno_list) == 0:
@@ -131,8 +121,8 @@ def initiate_filter_genes(gene_list):
     print "[Program] Detected file 'Wanted_Genes.txt' in local directory, with %d genes inside." % (len(gene_list))
     while (True):
         usr_in = raw_input('Would you like to initiate gene filtering? [y/n]: ')
-        if usr_in == 'y': return 0
-        if usr_in == 'n': return 1
+        if usr_in == 'y': return True
+        if usr_in == 'n': return False
         #If input not valid, try again
         print "[ERROR] Invalid input. Try again."
 
@@ -140,6 +130,10 @@ def initiate_filter_genes(gene_list):
 
 #Function that formats an individual annotations
 """ FEEL FREE TO CHANGE BELOW """
+#TODO: the below is problematic, especially for handling non 'NM' variants
+#TODO: either check for functional types, only check first annotation and/or
+#TODO:  use other metrics to format the search term
+
 def format_annotation(raw_anno):
     #Shorten the exon formatting, if present
     good_anno = raw_anno.replace(":exon",".")
