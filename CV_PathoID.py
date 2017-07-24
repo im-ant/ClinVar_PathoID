@@ -39,6 +39,15 @@
 #
 # Author: Anthony Chen
 ##################################################################"""
+
+###
+#Harcoded columns of interest to initiate from the file
+cols_of_interest = [9,7,10,11]
+
+#Newline delimiter
+NEWLINE_DELIM = '\n'
+
+
 #System libraries
 import sys
 import re
@@ -84,7 +93,7 @@ def read_and_initialize (filename, delim, interest_cols, file_content):
         print "[ERROR] I/O error({0}): {1}".format(e.errno, e.strerror)
         return 1
     #Read the entire file and separate by newline delimiters
-    rows = f.read().split('\r')
+    rows = f.read().split(NEWLINE_DELIM) #NOTE: Be careful here
     rows.pop(0) #Remove the header (first) row!
     #Iterate through each now-separated row
     for r in rows:
@@ -92,6 +101,11 @@ def read_and_initialize (filename, delim, interest_cols, file_content):
         col_content = []
         #Separate each row into columns
         cols = r.split(delim)
+        #TODO: delete below
+        if len(cols) == 1:
+            continue
+        #TODO: delete above
+
         #Iterate through the list of column numbers of interest
         for i in interest_cols:
             col_content.append(cols[i])
@@ -107,6 +121,14 @@ def search_ClinVar(variant_list):
     #Edit the annotations to become searchable
     print "[Program] Formatting variant annotations..."
     variant.format_variantList(variant_list)
+
+    #TODO: delete below
+    for v in variant_list:
+        print v.annotation
+        print v.anno_list
+        print
+    #TODO: delete above
+
     #Loop through the variant list to find record IDs via eSearch
     print "[Program] Beginning ClinVar eSearch for record IDs..."
     connect.ClinVar_Search_Loop(variant_list, 0)
@@ -169,13 +191,13 @@ def write_new_csvFile(filename, v_list):
     f_out = open(output_name, 'w')
     #Write header
     header = ['Gene Name','Detailed Variant Annotation','SNP (rs number)','Clinical Significance','Disease Conditions']
-    f_out.write(','.join(header)+'\r')
+    f_out.write(','.join(header)+NEWLINE_DELIM)
     #Iterate through all variants to write content
     for v in v_list:
         #Get all related information
         infoList=[v.gene,v.annotation,v.snp,v.output_clin_sig(),v.output_conditions()]
         #Write information
-        f_out.write(','.join(infoList)+'\r')
+        f_out.write(','.join(infoList)+NEWLINE_DELIM)
     #Close the file output stream
     f_out.close()
 
@@ -192,14 +214,14 @@ def append_end_column(filename,v_list):
     #Open reading file - should be okay with exception since it is the same file
     f_in = open(filename, 'r')
     #Read the input file and split via newline delimiter
-    input_rows = f_in.read().split('\r')
+    input_rows = f_in.read().split(NEWLINE_DELIM)
     #Generate output file name using the input file name and today's date
     date = str(datetime.date.today()).replace('-','')
     output_name = filename.replace('.','_ClinVarAppended_%s.'%(date))
     #Open output file
     f_out = open(output_name, 'w')
     #Write the header of output file
-    f_out.write(input_rows[0]+delim+"Clinical Significance"+delim+"Conditions"+'\r')
+    f_out.write(input_rows[0]+delim+"Clinical Significance"+delim+"Conditions"+NEWLINE_DELIM)
     #Iterate through the rest of the file
     for i in range(1, len(input_rows)):
         #Find and double check variant information
@@ -212,7 +234,7 @@ def append_end_column(filename,v_list):
         #Write out the pre-existing file content
         f_out.write(input_rows[i])
         #Write out the pathogenicity content
-        f_out.write('%s%s%s%s\r'%(delim,patho,delim,cond))
+        f_out.write('%s%s%s%s%s'%(delim,patho,delim,cond, NEWLINE_DELIM))
     #Close the input and output files
     f_in.close()
     f_out.close()
@@ -222,8 +244,6 @@ def append_end_column(filename,v_list):
 
 # Main Workflow Function
 def main():
-    #Harcoded columns of interest to initiate from the file
-    cols_of_interest = [9,7,10,11]
     #Check for number of command-line arguments
     if len(sys.argv) != 2:
         print "[ERROR] Incorrect number of arguments."
