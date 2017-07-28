@@ -6,6 +6,8 @@
 #   associated disease condition.
 #
 # Harcoded reading input file format:
+#   - column 2 (index 1): Chromosome
+#   - column 3 (index 2): Position on chromosome
 #   - column 10 (index 9): Gene symbol
 #   - column 8 (index 7): Variant function type (VFT)
 #   - column 11 (index 10): detailed variant annotation
@@ -42,7 +44,8 @@
 
 ###
 #Harcoded columns of interest to initiate from the file
-cols_of_interest = [9,7,10,11]
+#NOTE: if changing this, will also have to change the variant object initialization
+cols_of_interest = [1,2,9,7,10,11]
 
 #Newline delimiter
 NEWLINE_DELIM = '\n'
@@ -78,7 +81,7 @@ def read_file(variant_list, filename, interest_cols):
         print "[ERROR] File extension not recognized, make sure it is 'output' or 'csv'"
     #Initialize the content of the file:
     for r in file_content:
-        variant_list.append(Var(r[0],r[1],r[2],r[3]))
+        variant_list.append(Var(r[0],r[1],r[2],r[3],r[4],r[5]))
     #Return good
     return 0
 
@@ -101,10 +104,9 @@ def read_and_initialize (filename, delim, interest_cols, file_content):
         col_content = []
         #Separate each row into columns
         cols = r.split(delim)
-        #TODO: delete below
-        if len(cols) == 1:
-            continue
-        #TODO: delete above
+
+        #NOTE: hacky solution to get rid of weird newline delimination
+        if len(cols) == 1: continue
 
         #Iterate through the list of column numbers of interest
         for i in interest_cols:
@@ -121,13 +123,6 @@ def search_ClinVar(variant_list):
     #Edit the annotations to become searchable
     print "[Program] Formatting variant annotations..."
     variant.format_variantList(variant_list)
-
-    #TODO: delete below
-    for v in variant_list:
-        print v.annotation
-        print v.anno_list
-        print
-    #TODO: delete above
 
     #Loop through the variant list to find record IDs via eSearch
     print "[Program] Beginning ClinVar eSearch for record IDs..."
@@ -190,12 +185,12 @@ def write_new_csvFile(filename, v_list):
     #Open the output file
     f_out = open(output_name, 'w')
     #Write header
-    header = ['Gene Name','Detailed Variant Annotation','SNP (rs number)','Clinical Significance','Disease Conditions']
+    header = ['Chromosome','Position','Gene Name','Detailed Variant Annotation','SNP (rs number)','Clinical Significance','Disease Conditions']
     f_out.write(','.join(header)+NEWLINE_DELIM)
     #Iterate through all variants to write content
     for v in v_list:
         #Get all related information
-        infoList=[v.gene,v.annotation,v.snp,v.output_clin_sig(),v.output_conditions()]
+        infoList=[v.chromosome, v.position, v.gene,v.annotation,v.snp,v.output_clin_sig(),v.output_conditions()]
         #Write information
         f_out.write(','.join(infoList)+NEWLINE_DELIM)
     #Close the file output stream
