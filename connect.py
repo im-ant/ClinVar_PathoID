@@ -89,17 +89,25 @@ def ClinVar_Search_Loop(v_list, search_type):
 #Function to generate the eSearch-appropriate url query from a Var object
 def eSearch_generate_query(var):
     #Combine all searchable items into a single list
+    """
     search_term_list = var.anno_list #Direct copy for setting the base list
     if any(char.isdigit() for char in var.snp): #if it has an rs number
         search_term_list.append(var.snp) #append the rs number
+    """
+    search_term_list=[var.chromosome+"[chr]", var.position+"[chrpos37]"]
+
     #The base url to access the ClinVar database via EUtils
     url_base = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term="
+
     #URL-encode then join the search terms into an "OR"-separated string
-    encoded_terms = "("+urllib.quote_plus(") OR (".join([t for t in search_term_list]))+")"
+    encoded_terms = "("+urllib.quote_plus(") AND (".join([t for t in search_term_list]))+")" #NOTE: AND or OR
+
     #Add the max return number (temp one for now)
     retmax = "&retmax=500"
+
     #Combine and return all the search terms
     return url_base+encoded_terms+retmax
+
 
 #Function that access eSearch and return a list of ClinVar IDs
 def eSearch_getIDs(url_query):
