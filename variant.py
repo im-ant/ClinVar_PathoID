@@ -20,8 +20,10 @@ import sys
 
 class Var:
     #Class constructor and attributes
-    def __init__(self, gene, func_type, anno, snp):
+    def __init__(self, chromo, pos, gene, func_type, anno, snp):
         #Content from file
+        self.chromosome = chromo
+        self.position = pos
         self.gene = gene #Gene symbol
         self.function_type = func_type #Function type
         self.annotation = anno #Detailed variant annotation
@@ -110,7 +112,6 @@ def format_variantList(v_list):
 
         #Iterate through each annotation to format them properly for search
         for j in range(0, len(v_list[i].anno_list)):
-            print i,j #TODO; delete line
             #BUG: also something wrong with below when filtering genes, due to pop function
             #BUG: need to do gene filtering in a different way
             v_list[i].anno_list[j] = format_annotation(v_list[i].anno_list[j])
