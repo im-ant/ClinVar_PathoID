@@ -34,7 +34,7 @@ Below are assumptions made about the input file name & format. If those assumpti
 - Column content of input file (counting from 1, not 0):
 
 | Column number | 2 | 3 | 10 | 11 | 12 |
-| -
+| --- | --- | --- | --- | --- | --- |
 | **Column content** | Chromosome | Position | Gene Symbols | Detailed Annotation | All SNPs |
 | **Example** | 10 | 176120 | TUBB8 | exonic:nonsynonymous_SNV:TUBB8:NM_177987:exon4:c.A836T:p.Q279L | rs4023076 |
 
@@ -43,7 +43,7 @@ Below are assumptions made about the input file name & format. If those assumpti
   - Example below:
 
 | Good Filename Format | filename.output , filename.csv, filename_for_clinvar.output |
-| --
+| --- | --- |
 | **Bad Filename Format** | file.name.output , file.name.csv |
 
 
